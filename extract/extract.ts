@@ -144,4 +144,5 @@ export async function extract() {
   }
 
   csvFile.close();
+  console.log(`Finished - All out is in '${join(Deno.cwd(), "out")}'`);
 }
