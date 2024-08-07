@@ -29,4 +29,3 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           artifacts: "build/**"
-          bodyFile: "body.md"
