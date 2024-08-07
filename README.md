@@ -27,6 +27,7 @@
 
 options:
   - `--install-dir "C:\\Path\\to\\RiskOfRain2"` - The installation directory of Risk of Rain 2 - **THIS IS REQUIRED OR IT WILL NOT BE ABLE TO EXTRACT THE INFORMATION**
+  - `--out "PATH\\to\\Output\\Directory` - Used for manually setting an output directory, on default it will fallback to an `out` folder in the current working directory the application is run in.
 
 ---
 

@@ -8,8 +8,10 @@ import { parse as parseXML } from "https://deno.land/x/xml@5.4.13/mod.ts";
 const TEncoder = new TextEncoder();
 
 export async function extract() {
-  const directory = normalize(ARGS["install-dir"].toString() || "C:\\Program Files (x86)\\Steamsteamapps\\common\\Risk of Rain 2");
+  const directory = normalize(ARGS["install-dir"]?.toString() || "C:\\Program Files (x86)\\Steamsteamapps\\common\\Risk of Rain 2");
   const run_reports_dir = join(directory, "Risk of Rain 2_Data/RunReports/History");
+
+  const out_dir = normalize(ARGS["out"]?.toString() || join(Deno.cwd(), "out"));
 
   if (!(await checkPaths([directory, run_reports_dir]))) {
     console.log(`The installation directory at '${directory}', doesn't exist or subsequent required sub directories.`);
@@ -64,11 +66,12 @@ export async function extract() {
   const RawRuns = [];
 
   for (const file of files) {
-    ensureDir("out");
+    ensureDir(out_dir);
     console.log(`Reading: ${file.name}`);
     const data = parseXML(await Deno.readTextFile(file.path)) as any;
-    console.log(`Writing: out/${file.name}.json`);
-    await Deno.writeTextFile(`out/${file.name}.json`, JSON.stringify(data));
+    const out_path = join(out_dir, `${file.name}.json`);
+    console.log(`Writing: ${out_path}`);
+    await Deno.writeTextFile(out_path, JSON.stringify(data));
 
     RawRuns.push(data);
 
@@ -117,14 +120,19 @@ export async function extract() {
     Runs.push(Run);
   }
 
-  console.log(`Writing: out/runs.json`);
-  await Deno.writeTextFile("out/runs.json", JSON.stringify(Runs));
-  console.log(`Writing: out/runs-all.json`);
-  await Deno.writeTextFile(`out/runs-all.json`, JSON.stringify(RawRuns));
+  ensureDir(out_dir);
+  let runs_path = join(out_dir, "runs.json");
+  console.log(`Writing: ${runs_path}`);
+  await Deno.writeTextFile(runs_path, JSON.stringify(Runs));
+  ensureDir(out_dir);
+  runs_path = join(out_dir, "runs-all.json");
+  console.log(`Writing: ${runs_path}`);
+  await Deno.writeTextFile(runs_path, JSON.stringify(RawRuns));
 
-  if (await checkPaths(["out/runs.csv"])) await Deno.remove("out/runs.csv");
-  console.log(`Writing: out/runs.csv`);
-  const csvFile = await Deno.open("out/runs.csv", { createNew: true, write: true });
+  const csv_path = join(out_dir, "runs.csv");
+  if (await checkPaths([csv_path])) await Deno.remove(csv_path);
+  console.log(`Writing: ${csv_path}`);
+  const csvFile = await Deno.open(csv_path, { createNew: true, write: true });
   csvFile.write(
     TEncoder.encode(
       "guid;gamemode;ending;seed;rulebook;timestart;timeend;timerun;playername;character;totalTimeAlive;totalKills;totalMinionKills;totalDamageDealt;totalMinionDamage;totalDamageTaken;totalHealthHealed;level;totalGoldCollected;totalDistanceTraveled;totalItemsCollected;items\n"
@@ -149,5 +157,5 @@ export async function extract() {
   }
 
   csvFile.close();
-  console.log(`Finished - All out is in '${join(Deno.cwd(), "out")}'`);
+  console.log(`Finished - All out is in '${out_dir}'`);
 }
