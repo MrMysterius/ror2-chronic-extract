@@ -61,6 +61,7 @@ export async function extract() {
       };
     };
   }[] = [];
+  const RawRuns = [];
 
   for (const file of files) {
     ensureDir("out");
@@ -68,6 +69,8 @@ export async function extract() {
     const data = parseXML(await Deno.readTextFile(file.path)) as any;
     console.log(`Writing: out/${file.name}.json`);
     await Deno.writeTextFile(`out/${file.name}.json`, JSON.stringify(data));
+
+    RawRuns.push(data);
 
     const player = data.RunReport.playerInfos.PlayerInfo[0] || data.RunReport.playerInfos.PlayerInfo;
 
@@ -116,6 +119,8 @@ export async function extract() {
 
   console.log(`Writing: out/runs.json`);
   await Deno.writeTextFile("out/runs.json", JSON.stringify(Runs));
+  console.log(`Writing: out/runs-all.json`);
+  await Deno.writeTextFile(`out/runs-all.json`, JSON.stringify(RawRuns));
 
   if (await checkPaths(["out/runs.csv"])) await Deno.remove("out/runs.csv");
   console.log(`Writing: out/runs.csv`);
