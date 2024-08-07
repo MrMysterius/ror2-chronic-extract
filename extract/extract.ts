@@ -133,7 +133,7 @@ export async function extract() {
           run.player.name
         };${run.player.character};${run.player.stats.totalTimeAlive};${run.player.stats.totalKills};${run.player.stats.totalMinionKills};${
           run.player.stats.totalDamageDealt
-        };${run.player.stats.totalMinionDamageDealt};${run.player.stats.totalDamageDealt};${run.player.stats.totalHealthHealed};${
+        };${run.player.stats.totalMinionDamageDealt};${run.player.stats.totalDamageTaken};${run.player.stats.totalHealthHealed};${
           run.player.stats.highestLevel
         };${run.player.stats.totalGoldCollected};${run.player.stats.totalDistanceTraveled};${run.player.stats.totalItemsCollected};${run.items.reduce(
           (p, c) => (p += `${c.name}-${c.count} `),
