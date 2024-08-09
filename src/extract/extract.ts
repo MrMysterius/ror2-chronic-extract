@@ -1,7 +1,7 @@
 import { join, normalize } from "https://deno.land/std@0.224.0/path/mod.ts";
 
 import { ARGS } from "../args.ts";
-import { checkPaths } from "./checkPaths.ts";
+import { checkPaths } from "../checkPaths.ts";
 import { ensureDir } from "https://deno.land/std@0.224.0/fs/mod.ts";
 import { parse as parseXML } from "https://deno.land/x/xml@5.4.13/mod.ts";
 
