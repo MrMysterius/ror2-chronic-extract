@@ -1,3 +1,5 @@
+import { string } from "https://deno.land/x/zod@v3.23.8/types.ts";
+
 export const Items = {
   AACannon: { display_name: "ITEM_AACANNON_NAME", rarity: "No Tier", type: ["No Tag"] },
   AdaptiveArmor: { display_name: "ITEM_ADAPTIVEARMOR_NAME", rarity: "No Tier", type: ["Utility"] },
@@ -183,3 +185,7 @@ export const Items = {
   WarCryOnMultiKill: { display_name: "Berzerker's Pauldron", rarity: "Green", type: ["Damage", "OnKillEffect"] },
   WardOnLevel: { display_name: "Warbanner", rarity: "White", type: ["Utility", "AIBlacklist", "CannotCopy"] },
 };
+
+export interface TItem {
+  [key: string]: { display_name: string; rarity: string; type: string[] };
+}
