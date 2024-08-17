@@ -4,6 +4,7 @@ import { ARGS } from "../args.ts";
 import { checkPaths } from "../checkPaths.ts";
 import { ensureDir } from "https://deno.land/std@0.224.0/fs/mod.ts";
 import { parse as parseXML } from "https://deno.land/x/xml@5.4.13/mod.ts";
+import { readDir } from "./read-dir.ts";
 
 const TEncoder = new TextEncoder();
 
@@ -17,15 +18,7 @@ export async function extract() {
     console.log(`The installation directory at '${directory}', doesn't exist or subsequent required sub directories.`);
   }
 
-  const files: Array<{ info: Deno.FileInfo; path: string; name: string }> = [];
-
-  for await (const file of Deno.readDir(run_reports_dir)) {
-    if (!file.isFile) continue;
-    const fPath = join(run_reports_dir, file.name);
-    const stat = await Deno.stat(fPath);
-    files.push({ info: stat, path: fPath, name: file.name });
-  }
-
+  const files = await readDir(run_reports_dir);
   files.sort((a, b) => (b.info.birthtime?.getTime() || 0) - (a.info.birthtime?.getTime() || 0));
 
   const Runs: {
@@ -70,8 +63,7 @@ export async function extract() {
     let data: any;
     try {
       data = parseXML(await Deno.readTextFile(file.path)) as any;
-    }
-    catch (_err) {
+    } catch (_err) {
       console.log(`Corrupted File: ${file.name}`);
       continue;
     }
