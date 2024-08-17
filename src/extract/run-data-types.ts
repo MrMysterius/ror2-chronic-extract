@@ -12,7 +12,7 @@ export const VPlayerInfo = z.object({
   statSheet: z.object({
     fields: z.record(
       z.string(),
-      z.string().transform((v) => parseInt(v))
+      z.string().transform((v) => parseFloat(v))
     ),
   }),
   itemAcquisitionOrder: z.string().transform((v) => {
@@ -57,8 +57,8 @@ export const VRunData = z.object({
     seed: z.string(),
     runStartTimeUtc: z.string(),
     snapshotTimeUtc: z.string(),
-    snapshotRunTime: z.string().transform((v) => parseInt(v)),
-    runStopwatchValue: z.string().transform((v) => parseInt(v)),
+    snapshotRunTime: z.string().transform((v) => parseFloat(v)),
+    runStopwatchValue: z.string().transform((v) => parseFloat(v)),
     ruleBook: z.string().transform((v) => v.split(" ")),
     playerInfos: z.object({
       PlayerInfo: z.union([z.array(VPlayerInfo), VPlayerInfo.transform((v) => [v])]),
