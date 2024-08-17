@@ -5,7 +5,7 @@ import { Equipment } from "../data/equipmen-mapping.ts";
 import { z } from "https://deno.land/x/zod/mod.ts";
 
 export const VPlayerInfo = z.object({
-  name: z.number(),
+  name: z.string(),
   bodyName: z.string(),
   killerBodyName: z.string(),
   isDead: z.string().transform((v) => parseInt(v)),
@@ -29,15 +29,23 @@ export const VPlayerInfo = z.object({
     z.string(),
     z.string().transform((v) => parseInt(v))
   ),
-  equipment: z.string().transform((v) => {
-    const display_name = Equipment[v as keyof typeof Equipment];
-    return display_name;
-  }),
-  finalMessageToken: z.string().transform((v) => {
-    return { token: v, message: DeathMessages[v as keyof typeof DeathMessages] };
-  }),
+  equipment: z.union([
+    z.null().transform(() => "None"),
+    z.string().transform((v) => {
+      const display_name = Equipment[v as keyof typeof Equipment];
+      return display_name;
+    }),
+  ]),
+  finalMessageToken: z.union([
+    z.null().transform(() => {
+      return { token: "none", message: "-" };
+    }),
+    z.string().transform((v) => {
+      return { token: v, message: DeathMessages[v as keyof typeof DeathMessages] };
+    }),
+  ]),
   localPlayerIndex: z.string().transform((v) => parseInt(v)),
-  userProfileFileName: z.string(),
+  userProfileFileName: z.union([z.null(), z.string()]),
 });
 
 export const VRunData = z.object({
