@@ -5,6 +5,7 @@ import { checkPaths } from "../checkPaths.ts";
 import { ensureDir } from "https://deno.land/std@0.224.0/fs/mod.ts";
 import { parse as parseXML } from "https://deno.land/x/xml@5.4.13/mod.ts";
 import { readDir } from "./read-dir.ts";
+import { readRuns } from "./read-runs.ts";
 
 const TEncoder = new TextEncoder();
 
@@ -21,102 +22,7 @@ export async function extract() {
   const files = await readDir(run_reports_dir);
   files.sort((a, b) => (b.info.birthtime?.getTime() || 0) - (a.info.birthtime?.getTime() || 0));
 
-  const Runs: {
-    guid: string;
-    gameModeName: string;
-    gameEnding: string;
-    seed: string;
-    ruleBook: string;
-    times: {
-      start: number;
-      end: number;
-      run: number;
-    };
-    items: {
-      name: string;
-      count: number;
-      rarity: string;
-    }[];
-    player: {
-      name: string;
-      character: string;
-      stats: {
-        totalTimeAlive: number;
-        totalKills: number;
-        totalMinionKills: number;
-        totalDamageDealt: number;
-        totalMinionDamageDealt: number;
-        totalDamageTaken: number;
-        totalHealthHealed: number;
-        highestLevel: number;
-        totalGoldCollected: number;
-        totalDistanceTraveled: number;
-        totalItemsCollected: number;
-      };
-    };
-  }[] = [];
-  const RawRuns = [];
-
-  for (const file of files) {
-    ensureDir(out_dir);
-    console.log(`Reading: ${file.name}`);
-    let data: any;
-    try {
-      data = parseXML(await Deno.readTextFile(file.path)) as any;
-    } catch (_err) {
-      console.log(`Corrupted File: ${file.name}`);
-      continue;
-    }
-    const out_path = join(out_dir, `${file.name}.json`);
-    console.log(`Writing: ${out_path}`);
-    await Deno.writeTextFile(out_path, JSON.stringify(data));
-
-    RawRuns.push(data);
-
-    const player = data.RunReport.playerInfos.PlayerInfo[0] || data.RunReport.playerInfos.PlayerInfo;
-
-    const Run = {
-      guid: data.RunReport.runGuid,
-      gameModeName: data.RunReport.gameModeName,
-      gameEnding: data.RunReport.gameEnding,
-      seed: data.RunReport.seed,
-      ruleBook: data.RunReport.ruleBook,
-      times: {
-        start: data.RunReport.runStartTimeUtc,
-        end: data.RunReport.snapshotTimeUtc,
-        run: data.RunReport.snapshotRunTime,
-      },
-      player: {
-        name: player.name,
-        character: player.bodyName,
-        stats: {
-          totalTimeAlive: player.statSheet.fields.totalTimeAlive,
-          totalKills: player.statSheet.fields.totalKills,
-          totalMinionKills: player.statSheet.fields.totalMinionKills,
-          totalDamageDealt: player.statSheet.fields.totalDamageDealt,
-          totalMinionDamageDealt: player.statSheet.fields.totalMinionDamageDealt,
-          totalDamageTaken: player.statSheet.fields.totalDamageTaken,
-          totalHealthHealed: player.statSheet.fields.totalHealthHealed,
-          highestLevel: player.statSheet.fields.highestLevel,
-          totalGoldCollected: player.statSheet.fields.totalGoldCollected,
-          totalDistanceTraveled: player.statSheet.fields.totalDistanceTraveled,
-          totalItemsCollected: player.statSheet.fields.totalItemsCollected,
-        },
-      },
-      items:
-        (player.itemAcquisitionOrder.split(" ") as string[]).map((a) => {
-          return { name: a, count: 0, rarity: "idk" };
-        }) || [],
-    };
-
-    for (const [name, count] of Object.entries(player.itemStacks)) {
-      const index = Run.items.findIndex((i) => i.name == name);
-      if (index == -1) continue;
-      Run.items[index].count = count as number;
-    }
-
-    Runs.push(Run);
-  }
+  const ExtractedRuns = await readRuns(files, out_dir);
 
   ensureDir(out_dir);
   let runs_path = join(out_dir, "runs.json");

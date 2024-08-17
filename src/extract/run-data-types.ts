@@ -57,3 +57,5 @@ export const VRunData = z.object({
     }),
   }),
 });
+
+export type TRunData = z.output<typeof VRunData>;
