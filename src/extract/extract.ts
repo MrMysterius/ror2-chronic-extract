@@ -67,7 +67,14 @@ export async function extract() {
   for (const file of files) {
     ensureDir(out_dir);
     console.log(`Reading: ${file.name}`);
-    const data = parseXML(await Deno.readTextFile(file.path)) as any;
+    let data: any;
+    try {
+      data = parseXML(await Deno.readTextFile(file.path)) as any;
+    }
+    catch (_err) {
+      console.log(`Corrupted File: ${file.name}`);
+      continue;
+    }
     const out_path = join(out_dir, `${file.name}.json`);
     console.log(`Writing: ${out_path}`);
     await Deno.writeTextFile(out_path, JSON.stringify(data));
