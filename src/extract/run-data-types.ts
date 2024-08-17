@@ -1,5 +1,6 @@
 import { Items, TItem } from "../data/item-mapping.ts";
 
+import { DeathMessages } from "../data/death-message.ts";
 import { Equipment } from "../data/equipmen-mapping.ts";
 import { z } from "https://deno.land/x/zod/mod.ts";
 
@@ -31,7 +32,9 @@ export const VPlayerInfo = z.object({
       const display_name = Equipment[v as keyof typeof Equipment];
       return display_name;
     }),
-    finalMessageToken: z.string(), //TODO Implement Mapping for additional info https://riskofrain2.fandom.com/wiki/Death_Messages
+    finalMessageToken: z.string().transform((v) => {
+      return { token: v, message: DeathMessages[v as keyof typeof DeathMessages] };
+    }),
     localPlayerIndex: z.string().transform((v) => parseInt(v)),
     userProfileFileName: z.string(),
   }),
