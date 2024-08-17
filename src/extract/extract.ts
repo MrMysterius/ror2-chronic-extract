@@ -25,14 +25,19 @@ export async function extract() {
 
   const ExtractedRuns = await readRuns(files, out_dir);
 
-  ensureDir(out_dir);
-  let runs_path = join(out_dir, "runs.json");
-  console.log(`Writing: ${runs_path}`);
-  await Deno.writeTextFile(runs_path, JSON.stringify(Runs));
-  ensureDir(out_dir);
-  runs_path = join(out_dir, "runs-all.json");
-  console.log(`Writing: ${runs_path}`);
-  await Deno.writeTextFile(runs_path, JSON.stringify(RawRuns));
+  {
+    const transformed_runs_outpath = join(out_dir, "runs-transformed-all.json");
+    console.log(`[WRITING] ${transformed_runs_outpath}`);
+    ensureDir(out_dir);
+    await Deno.writeTextFile(transformed_runs_outpath, JSON.stringify(ExtractedRuns.map((v) => v.transformed)));
+    console.log(`[DONE] ${transformed_runs_outpath}`);
+
+    const raw_runs_outpath = join(out_dir, "runs-raw-all.json");
+    console.log(`[WRITING] ${raw_runs_outpath}`);
+    ensureDir(out_dir);
+    await Deno.writeTextFile(raw_runs_outpath, JSON.stringify(ExtractedRuns.map((v) => v.raw)));
+    console.log(`[DONE] ${raw_runs_outpath}`);
+  }
 
   const csv_path = join(out_dir, "runs.csv");
   if (await checkPaths([csv_path])) await Deno.remove(csv_path);
