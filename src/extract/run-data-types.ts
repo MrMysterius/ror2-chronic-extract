@@ -1,5 +1,6 @@
 import { Items, TItem } from "./item-mapping.ts";
 
+import { Equipment } from "./equipmen-mapping.ts";
 import { z } from "https://deno.land/x/zod/mod.ts";
 
 export const VPlayerInfo = z.object({
@@ -26,7 +27,10 @@ export const VPlayerInfo = z.object({
       z.string(),
       z.string().transform((v) => parseInt(v))
     ),
-    equipment: z.string(), //TODO Implement Equipment Mapping to get Actual Name https://risk-of-thunder.github.io/R2Wiki/Mod-Creation/Developer-Reference/Items-and-Equipments-Data/
+    equipment: z.string().transform((v) => {
+      const display_name = Equipment[v as keyof typeof Equipment];
+      return display_name;
+    }),
     finalMessageToken: z.string(), //TODO Implement Mapping for additional info https://riskofrain2.fandom.com/wiki/Death_Messages
     localPlayerIndex: z.string().transform((v) => parseInt(v)),
     userProfileFileName: z.string(),
