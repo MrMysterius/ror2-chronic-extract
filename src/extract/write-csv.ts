@@ -72,12 +72,12 @@ export async function writeCSVFile(path: string, runs: z.infer<typeof VRunData>[
     for (const player of run.RunReport.playerInfos.PlayerInfo) {
       let line = "";
       line += `${run.RunReport.runGuid};`;
-      line += `${run.RunReport.seed};`;
+      line += `"${run.RunReport.seed}";`;
       line += `${player.name};`;
       line += `${run.RunReport.gameModeName};`;
       line += `${run.RunReport.gameEnding};`;
-      line += `${run.RunReport.runStartTimeUtc};`;
-      line += `${run.RunReport.snapshotTimeUtc};`;
+      line += `"${run.RunReport.runStartTimeUtc}";`;
+      line += `"${run.RunReport.snapshotTimeUtc}";`;
       line += `${run.RunReport.snapshotRunTime};`;
       line += `${run.RunReport.runStopwatchValue};`;
       line += `${run.RunReport.ruleBook.join(" ")};`;
