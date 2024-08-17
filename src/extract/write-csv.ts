@@ -65,7 +65,7 @@ export async function writeCSVFile(path: string, runs: z.infer<typeof VRunData>[
     "deathMessage",
     "itemAcquisitionOrder",
   ];
-  await writeToFile(File, `${defaultHeaders.join(";")};${Array.from(headers.entries()).join(";")}`);
+  await writeToFile(File, `${defaultHeaders.join(";")};${Array.from(headers.entries()).join(";")}\n`);
 
   console.log(`%c[CSV]: Writing rows/runs... - ${path}`, "color: yellow");
   for (const run of runs) {
@@ -118,7 +118,7 @@ export async function writeCSVFile(path: string, runs: z.infer<typeof VRunData>[
         line += `${player.statSheet.fields[header]};`;
       }
 
-      await writeToFile(File, line.replace(/\;$/, ""));
+      await writeToFile(File, line.replace(/\;$/, "\n"));
     }
   }
 
