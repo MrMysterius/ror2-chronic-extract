@@ -115,7 +115,7 @@ export async function writeCSVFile(path: string, runs: z.infer<typeof VRunData>[
       line += `${player.itemAcquisitionOrder.map((v) => v.item.display_name).join(" ")};`;
 
       for (const header of headers.values()) {
-        line += `${player.statSheet.fields[header]};`;
+        line += `${player.statSheet.fields[header] || 0};`;
       }
 
       await writeToFile(File, line.replace(/\;$/, "\n"));
