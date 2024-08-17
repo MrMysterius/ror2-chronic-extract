@@ -1,6 +1,6 @@
-import { Items, TItem } from "./item-mapping.ts";
+import { Items, TItem } from "../data/item-mapping.ts";
 
-import { Equipment } from "./equipmen-mapping.ts";
+import { Equipment } from "../data/equipmen-mapping.ts";
 import { z } from "https://deno.land/x/zod/mod.ts";
 
 export const VPlayerInfo = z.object({
