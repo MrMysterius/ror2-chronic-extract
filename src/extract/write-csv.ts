@@ -96,19 +96,19 @@ export async function writeCSVFile(path: string, runs: z.infer<typeof VRunData>[
       line += `${Array.from(ItemTotals.entries())
         .filter((v) => !v[0].includes("Void"))
         .reduce((p, c) => (p += c[1]), 0)};`;
-      line += `${ItemTotals.get("No Tier")}:`;
-      line += `${ItemTotals.get("White")}:`;
-      line += `${ItemTotals.get("Green")}:`;
-      line += `${ItemTotals.get("Boss")}:`;
-      line += `${ItemTotals.get("Red")}:`;
-      line += `${ItemTotals.get("Lunar")}:`;
+      line += `${ItemTotals.get("No Tier")};`;
+      line += `${ItemTotals.get("White")};`;
+      line += `${ItemTotals.get("Green")};`;
+      line += `${ItemTotals.get("Boss")};`;
+      line += `${ItemTotals.get("Red")};`;
+      line += `${ItemTotals.get("Lunar")};`;
       line += `${Array.from(ItemTotals.entries())
         .filter((v) => v[0].includes("Void"))
         .reduce((p, c) => (p += c[1]), 0)};`;
-      line += `${ItemTotals.get("Void White")}:`;
-      line += `${ItemTotals.get("Void Green")}:`;
-      line += `${ItemTotals.get("Void Boss")}:`;
-      line += `${ItemTotals.get("Void Red")}:`;
+      line += `${ItemTotals.get("Void White")};`;
+      line += `${ItemTotals.get("Void Green")};`;
+      line += `${ItemTotals.get("Void Boss")};`;
+      line += `${ItemTotals.get("Void Red")};`;
       line += `${player.equipment};`;
       line += `${player.finalMessageToken.token};`;
       line += `${player.finalMessageToken.message};`;
