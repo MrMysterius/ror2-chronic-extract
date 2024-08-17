@@ -1,3 +1,5 @@
+import { z } from "https://deno.land/x/zod/mod.ts";
+
 export const Items = {
   AACannon: { display_name: "ITEM_AACANNON_NAME", rarity: "No Tier", type: ["No Tag"] },
   AdaptiveArmor: { display_name: "ITEM_ADAPTIVEARMOR_NAME", rarity: "No Tier", type: ["Utility"] },
@@ -185,5 +187,12 @@ export const Items = {
 };
 
 export interface TItem {
-  [key: string]: { display_name: string; rarity: string; type: string[] };
+  real_name: string;
+  display_name: string;
+  rarity: string;
+  type: string[];
 }
+
+export const VItemRarity = z.enum(["No Tier", "Red", "White", "Boss", "Green", "Lunar", "Void White", "Void Green", "Void Red", "Void Boss"]);
+
+export type TItemRarity = z.infer<typeof VItemRarity>;

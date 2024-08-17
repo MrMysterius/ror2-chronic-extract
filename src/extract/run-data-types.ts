@@ -14,30 +14,30 @@ export const VPlayerInfo = z.object({
       z.string(),
       z.string().transform((v) => parseInt(v))
     ),
-    itemAcquisitionOrder: z.string().transform((v) => {
-      const out = [];
-      for (const [i, str] of Object.entries(v.split(" "))) {
-        const index = parseInt(i);
-        const item = Items[str as keyof typeof Items];
-        if (!item) continue;
-        out.push({ acquisitionOrder: index, item: item as unknown as TItem });
-      }
-      return out;
-    }),
-    itemStacks: z.record(
-      z.string(),
-      z.string().transform((v) => parseInt(v))
-    ),
-    equipment: z.string().transform((v) => {
-      const display_name = Equipment[v as keyof typeof Equipment];
-      return display_name;
-    }),
-    finalMessageToken: z.string().transform((v) => {
-      return { token: v, message: DeathMessages[v as keyof typeof DeathMessages] };
-    }),
-    localPlayerIndex: z.string().transform((v) => parseInt(v)),
-    userProfileFileName: z.string(),
   }),
+  itemAcquisitionOrder: z.string().transform((v) => {
+    const out = [];
+    for (const [i, str] of Object.entries(v.split(" "))) {
+      const index = parseInt(i);
+      const item = Items[str as keyof typeof Items];
+      if (!item) continue;
+      out.push({ acquisitionOrder: index, item: Object.assign(item, { real_name: str }) as unknown as TItem });
+    }
+    return out;
+  }),
+  itemStacks: z.record(
+    z.string(),
+    z.string().transform((v) => parseInt(v))
+  ),
+  equipment: z.string().transform((v) => {
+    const display_name = Equipment[v as keyof typeof Equipment];
+    return display_name;
+  }),
+  finalMessageToken: z.string().transform((v) => {
+    return { token: v, message: DeathMessages[v as keyof typeof DeathMessages] };
+  }),
+  localPlayerIndex: z.string().transform((v) => parseInt(v)),
+  userProfileFileName: z.string(),
 });
 
 export const VRunData = z.object({
@@ -53,7 +53,7 @@ export const VRunData = z.object({
     runStopwatchValue: z.string().transform((v) => parseInt(v)),
     ruleBook: z.string().transform((v) => v.split(" ")),
     playerInfos: z.object({
-      PlayerInfo: z.union([z.array(VPlayerInfo), VPlayerInfo]),
+      PlayerInfo: z.union([z.array(VPlayerInfo), VPlayerInfo.transform((v) => [v])]),
     }),
   }),
 });

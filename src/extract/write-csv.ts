@@ -1,57 +1,131 @@
+import { TItemRarity, VItemRarity } from "../data/item-mapping.ts";
+
 import { ARGS } from "../args.ts";
 import { VRunData } from "./run-data-types.ts";
 import { checkPaths } from "../checkPaths.ts";
-import { join } from "https://deno.land/std@0.224.0/path/mod.ts";
 import { z } from "https://deno.land/x/zod/mod.ts";
 
 const Encoder = new TextEncoder();
 
 export async function writeCSVFile(path: string, runs: z.infer<typeof VRunData>[]) {
-  console.log(`%cCSV: Writing file... - ${path}`, "color: yellow");
-  path = join(path, "runs.csv");
+  console.log(`%c[CSV] Writing file... - ${path}`, "color: yellow");
 
   if (await checkPaths([path])) {
     if (ARGS["--force"] || ARGS["-f"]) {
       await Deno.remove(path);
     } else {
-      console.log(`%cCSV: File already exists and won't be overwritten - ${path}`, "color: red");
-      console.log(`%cUse -f | --force , if you want to overwrite the existing file.`, "color: red");
+      console.error(`%c[CSV] File already exists and won't be overwritten - ${path}`, "color: red");
+      console.error(`%cUse -f | --force , if you want to overwrite the existing file.`, "color: red");
       Deno.exit(1);
     }
   }
 
   const File = await Deno.open(path, { createNew: true, write: true });
 
-  console.log(`%cCSV: Writing header... - ${path}`, "color: yellow");
+  console.log(`%c[CSV]: Getting headers...`, "color: yellow");
+
+  const headers: Set<string> = new Set();
+  for (const run of runs) {
+    for (const player of run.RunReport.playerInfos.PlayerInfo) {
+      for (const key of Object.keys(player.statSheet.fields)) {
+        headers.add(key);
+      }
+    }
+  }
+
+  console.log(`%c[CSV]: Writing header... - ${path}`, "color: yellow");
+  const defaultHeaders = [
+    "runID",
+    "seed",
+    "playerName",
+    "gameMode",
+    "gameEnding",
+    "runStartTimeUtc",
+    "runEndTimeUtc",
+    "runTotalTime",
+    "runTimer",
+    "ruleBook",
+    "characterName",
+    "isDead",
+    "itemsTotal",
+    "itemsTotalNoVoid",
+    "itemsTotalNoTier",
+    "itemsTotalWhite",
+    "itemsTotalGreen",
+    "itemsTotalBoss",
+    "itemsTotalRed",
+    "itemsTotalLunar",
+    "itemsTotalVoid",
+    "itemsTotalVoidWhite",
+    "itemsTotalVoidGreen",
+    "itemsTotalVoidBoss",
+    "itemsTotalVoidRed",
+    "equipment",
+    "deathMessageToken",
+    "deathMessage",
+    "itemAcquisitionOrder",
+  ];
+  await writeToFile(File, `${defaultHeaders.join(";")};${Array.from(headers.entries()).join(";")}`);
+
+  console.log(`%c[CSV]: Writing rows/runs... - ${path}`, "color: yellow");
+  for (const run of runs) {
+    for (const player of run.RunReport.playerInfos.PlayerInfo) {
+      let line = "";
+      line += `${run.RunReport.runGuid};`;
+      line += `${run.RunReport.seed};`;
+      line += `${player.name};`;
+      line += `${run.RunReport.gameModeName};`;
+      line += `${run.RunReport.gameEnding};`;
+      line += `${run.RunReport.runStartTimeUtc};`;
+      line += `${run.RunReport.snapshotTimeUtc};`;
+      line += `${run.RunReport.snapshotRunTime};`;
+      line += `${run.RunReport.runStopwatchValue};`;
+      line += `${run.RunReport.ruleBook.join(" ")};`;
+      line += `${player.bodyName};`;
+      line += `${player.isDead};`;
+
+      const ItemTotals: Map<TItemRarity, number> = new Map();
+      for (const rarity of Object.values(VItemRarity.Values)) {
+        ItemTotals.set(rarity, 0);
+      }
+      for (const item of player.itemAcquisitionOrder) {
+        ItemTotals.set(item.item.rarity as TItemRarity, (ItemTotals.get(item.item.rarity as TItemRarity) as number) + player.itemStacks[item.item.real_name]);
+      }
+
+      line += `${Array.from(ItemTotals.values()).reduce((p, c) => (p += c), 0)};`;
+      line += `${Array.from(ItemTotals.entries())
+        .filter((v) => !v[0].includes("Void"))
+        .reduce((p, c) => (p += c[1]), 0)};`;
+      line += `${ItemTotals.get("No Tier")}:`;
+      line += `${ItemTotals.get("White")}:`;
+      line += `${ItemTotals.get("Green")}:`;
+      line += `${ItemTotals.get("Boss")}:`;
+      line += `${ItemTotals.get("Red")}:`;
+      line += `${ItemTotals.get("Lunar")}:`;
+      line += `${Array.from(ItemTotals.entries())
+        .filter((v) => v[0].includes("Void"))
+        .reduce((p, c) => (p += c[1]), 0)};`;
+      line += `${ItemTotals.get("Void White")}:`;
+      line += `${ItemTotals.get("Void Green")}:`;
+      line += `${ItemTotals.get("Void Boss")}:`;
+      line += `${ItemTotals.get("Void Red")}:`;
+      line += `${player.equipment};`;
+      line += `${player.finalMessageToken.token};`;
+      line += `${player.finalMessageToken.message};`;
+      line += `${player.itemAcquisitionOrder.map((v) => v.item.display_name).join(" ")};`;
+
+      for (const header of headers.values()) {
+        line += `${player.statSheet.fields[header]};`;
+      }
+
+      await writeToFile(File, line.replace(/\;$/, ""));
+    }
+  }
+
+  console.log(`%c[CSV]: DONE - ${path}`, "color: yellow");
+  File.close();
 }
 
-// const csv_path = join(out_dir, "runs.csv");
-//   if (await checkPaths([csv_path])) await Deno.remove(csv_path);
-//   console.log(`Writing: ${csv_path}`);
-//   const csvFile = await Deno.open(csv_path, { createNew: true, write: true });
-//   csvFile.write(
-//     TEncoder.encode(
-//       "guid;gamemode;ending;seed;rulebook;timestart;timeend;timerun;playername;character;totalTimeAlive;totalKills;totalMinionKills;totalDamageDealt;totalMinionDamage;totalDamageTaken;totalHealthHealed;level;totalGoldCollected;totalDistanceTraveled;totalItemsCollected;items\n"
-//     )
-//   );
-
-//   for (const run of Runs) {
-//     csvFile.write(
-//       TEncoder.encode(
-//         `${run.guid};${run.gameModeName};${run.gameEnding};${run.seed};${run.ruleBook};${run.times.start};${run.times.end};${run.times.run};${
-//           run.player.name
-//         };${run.player.character};${run.player.stats.totalTimeAlive};${run.player.stats.totalKills};${run.player.stats.totalMinionKills};${
-//           run.player.stats.totalDamageDealt
-//         };${run.player.stats.totalMinionDamageDealt};${run.player.stats.totalDamageTaken};${run.player.stats.totalHealthHealed};${
-//           run.player.stats.highestLevel
-//         };${run.player.stats.totalGoldCollected};${run.player.stats.totalDistanceTraveled};${run.player.stats.totalItemsCollected};${run.items.reduce(
-//           (p, c) => (p += `${c.name}-${c.count} `),
-//           ""
-//         )}\n`
-//       )
-//     );
-//   }
-
-//   csvFile.close();
-//   console.log(`Finished - All out is in '${out_dir}'`);
-// }
+async function writeToFile(file: Deno.FsFile, data: string) {
+  await file.write(Encoder.encode(data));
+}
