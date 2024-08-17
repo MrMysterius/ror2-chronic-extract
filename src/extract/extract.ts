@@ -16,7 +16,8 @@ export async function extract() {
   const out_dir = normalize(ARGS["out"]?.toString() || join(Deno.cwd(), "out"));
 
   if (!(await checkPaths([directory, run_reports_dir]))) {
-    console.log(`The installation directory at '${directory}', doesn't exist or subsequent required sub directories.`);
+    console.error(`%cThe installation directory at '${directory}', doesn't exist or subsequent required sub directories.`, "color: red;");
+    return;
   }
 
   const files = await readDir(run_reports_dir);
