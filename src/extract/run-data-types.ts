@@ -31,6 +31,7 @@ export const VPlayerInfo = z.object({
   ),
   equipment: z.union([
     z.null().transform(() => "None"),
+    z.literal("None"),
     z.string().transform((v) => {
       const display_name = Equipment[v as keyof typeof Equipment];
       return display_name;
