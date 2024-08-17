@@ -28,7 +28,6 @@ export async function extract() {
 
   files.sort((a, b) => (b.info.birthtime?.getTime() || 0) - (a.info.birthtime?.getTime() || 0));
 
-  //probably time spend, item rarity, item count, total damage done perhaps as well
   const Runs: {
     guid: string;
     gameModeName: string;
